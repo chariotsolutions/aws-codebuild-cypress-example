@@ -28,7 +28,7 @@ Resources:
         - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
         - "arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess"
       Policies:
-         -
+        -
           PolicyName:                   CodeBuildReportPolicy
           PolicyDocument:
             Version:                    "2012-10-17"
@@ -41,7 +41,6 @@ Resources:
                   - "codebuild:CreateReport"
                   - "codebuild:UpdateReport"
                   - "codebuild:BatchPutTestCases"
-
         - 
           PolicyName:                   CodeBuildLoggingPolicy
           PolicyDocument:
@@ -54,6 +53,11 @@ Resources:
                   - "logs:PutLogEvents"
                 Resource:                "*"
 
+  CypressReportBucket:
+    Type:                               AWS::S3::Bucket
+    Properties:
+      BucketName:                       !Sub "${AWS::StackName}-cypress-reports"
+
   CypressRunner:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -65,7 +69,7 @@ Resources:
         Type:                           S3
         NamespaceType:                  BUILD_ID
         Name:                           "reports.zip"
-        Location:                       !Ref CIBucket
+        Location:                       !Ref CypressReportBucket
         Packaging:                      ZIP
       LogsConfig:
         CloudWatchLogs:
