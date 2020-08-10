@@ -1,0 +1,39 @@
+<h3>Add an Item</h3>
+<form [formGroup]=shoppingItemForm
+     (ngSubmit)="addItem()">
+    <div class="form-group">
+        <label for="name">Item Name</label>
+        <input id="name" class="form-control" type="text" formControlName="name">
+    </div>
+    <div class="form-group">
+        <label for="category">Category</label>
+        <select id="category" class="form-control" formControlName="category">
+            <option [value]="itemTypes[0]">{{ itemTypes[0] }}</option>
+            <option [value]="itemTypes[1]">{{ itemTypes[1] }}</option>
+            <option [value]="itemTypes[2]">{{ itemTypes[2] }}</option>
+            <option [value]="itemTypes[3]">{{ itemTypes[3] }}</option>
+            <option [value]="itemTypes[4]">{{ itemTypes[4] }}</option>
+            <option [value]="itemTypes[5]">{{ itemTypes[5] }}</option>
+        </select>
+    </div>
+    <div class="button-group">
+      <button class="btn-large btn-primary">Add...</button>
+    </div>
+</form>
+<div *ngIf="shoppingList && shoppingList.length > 0">
+    <h3>Shopping List</h3>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <th>X</th>
+            <th>Name</th>
+            <th>Category</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of shoppingList">
+                <td><input type="checkbox"></td>
+                <td>{{ item.name }} </td>
+                <td>{{ item.category }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

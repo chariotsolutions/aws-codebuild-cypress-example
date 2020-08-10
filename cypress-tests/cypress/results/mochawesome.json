@@ -1,0 +1,105 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 1,
+    "pending": 0,
+    "failures": 0,
+    "start": "2020-08-10T21:55:19.739Z",
+    "end": "2020-08-10T21:55:21.075Z",
+    "duration": 1336,
+    "testsRegistered": 1,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "35ffa12e-30a8-4b68-9b1f-b537efe1dc1c",
+      "title": "",
+      "fullFile": "cypress/integration/shopping-list/add_list_item.js",
+      "file": "cypress/integration/shopping-list/add_list_item.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "23ee6cc8-7bd1-4f77-a5b0-0f825a0f7912",
+          "title": "Adding a list item",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "adds an item",
+              "fullTitle": "Adding a list item adds an item",
+              "timedOut": null,
+              "duration": 1309,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.get('input#name').type('Soap Flakes').should('have.value', 'Soap Flakes');\ncy.contains('Add...').click();\ncy.get('table').should('contain', 'Soap Flakes');\ncy.get('input#name').should('have.value', '');",
+              "err": {},
+              "uuid": "7b675b7e-2e9b-41ce-b0fd-0dd1ef759498",
+              "parentUUID": "23ee6cc8-7bd1-4f77-a5b0-0f825a0f7912",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "7b675b7e-2e9b-41ce-b0fd-0dd1ef759498"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1309,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "6.1.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/results",
+        "overwrite": false,
+        "html": false,
+        "json": true
+      },
+      "version": "5.1.0"
+    }
+  }
+}

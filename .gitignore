@@ -1,0 +1,7 @@
+node_modules
+.eclipse
+.project
+.settings
+.env
+cypress-tests/mochawesome-report
+

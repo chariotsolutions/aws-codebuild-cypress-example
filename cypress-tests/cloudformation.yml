@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion:               "2010-09-09"
+Description:                            "Cypress Test"
+
+Parameters:
+  GitHubProjectUrl:
+    Description:                        "The GitHub Project URL"
+    Type:                               "String"
+
+  CypressBaseUrl:
+    Description:                        "The base URL for the application under test"
+    Type:                               "String"
+
+Resources:
+  CypressRole:
+    Type:                               "AWS::IAM::Role"
+    Properties:
+      RoleName:                         !Sub "${AWS::StackName}-CypressRole"
+      AssumeRolePolicyDocument:
+        Version:                        "2012-10-17"
+        Statement:
+          - Effect:                     "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+        - "arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess"
+      Policies:
+         -
+          PolicyName:                   CodeBuildReportPolicy
+          PolicyDocument:
+            Version:                    "2012-10-17"
+            Statement:
+              -
+                Effect:                 "Allow"
+                Resource:               !Sub "arn:aws:codebuild::${AWS::AccountId}:report-group:*"
+                Action:
+                  - "codebuild:CreateReportGroup"
+                  - "codebuild:CreateReport"
+                  - "codebuild:UpdateReport"
+                  - "codebuild:BatchPutTestCases"
+
+        - 
+          PolicyName:                   CodeBuildLoggingPolicy
+          PolicyDocument:
+            Version:                    "2012-10-17"
+            Statement:
+              - Effect:                 "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:                "*"
+
+  CypressRunner:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name:                             !Sub "${AWS::StackName}-cypress-ui"
+      Description:                      Test the application via Cypress
+      ServiceRole:                      !GetAtt CypressRole.Arn
+      TimeoutInMinutes:                 5
+      Artifacts:
+        Type:                           S3
+        NamespaceType:                  BUILD_ID
+        Name:                           "reports.zip"
+        Location:                       !Ref CIBucket
+        Packaging:                      ZIP
+      LogsConfig:
+        CloudWatchLogs:
+          GroupName:                    !Sub "/codebuild/${AWS::StackName}-cypress-logs"
+          Status:                       ENABLED
+          StreamName:                   "ci-log"
+      Environment:
+        Type:                           LINUX_CONTAINER
+        PrivilegedMode:                 true
+        ComputeType:                    BUILD_GENERAL1_SMALL
+        Image:                          aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        EnvironmentVariables:
+          - Name:                       "CYPRESS_BASE_URL"
+            Value:                      !Ref CypressBaseUrl
+      
+      Source:
+        Auth:
+          Type:                         OAUTH
+        Location:                       !Ref GitHubProjectUrl
+        Type:                           GITHUB
+        GitCloneDepth:                  1
+        BuildSpec: |
+          version: 0.2
+          env:
+            NO_COLOR: 1
+          phases:
+            install:
+              runtime-versions:
+                nodejs: 12
+              commands:
+                - yum install -y xorg-x11-server-Xvfb.x86_64 gtk3-devel.x86_64 libnotify-devel.x86_64 GConf2-3.2.6-8.amzn2.0.2.x86_64 nss-3.44.0-4.amzn2.0.2.x86_64 libXScrnSaver.x86_64 alsa-lib-1.1.4.1-2.amzn2.x86_64
+            pre_build:
+              commands:
+                - cd cypress-tests
+                - npm install
+            build:
+              commands:
+                - cd cypress-tests
+                - NO_COLOR=1 npx cypress run --browser chromium
+              finally:
+                - npx mochawesome-merge "cypress/results/*.json" > mochawesome.json
+                - npx marge mochawesome.json
+
+          artifacts:
+            files:
+              - 'reports/**/*'
+              - 'screenshots/**/*'
+              - 'videos/**/*'
+              - 'mochawesome-reporst/**/*'
+            base-directory: 'docker-platform/cypress-tests/cypress/'
+
+          cache:
+            paths:
+              - 'docker-platform/**'
