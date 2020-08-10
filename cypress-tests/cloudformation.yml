@@ -109,7 +109,7 @@ Resources:
               commands:
                 - NO_COLOR=1 npx cypress run --browser chromium
               finally:
-                - npx mochawesome-merge "cypress/results/*.json" > mochawesome.json
+                - npx mochawesome-merge "cypress/reports/separate-reports/*.json" > mochawesome.json
                 - npx marge mochawesome.json
 
           artifacts:

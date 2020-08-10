@@ -2,9 +2,9 @@
     "baseUrl": "http://localhost:4200",
     "viewportWidth": 1024,
     "viewportHieght": 800,
-    "reporter": "mochawesome",
+    "reporter": "./node_modules/mochawesome/src/mochawesome.js",
     "reporterOptions": {
-        "reportDir": "cypress/results",
+        "reportDir": "cypress/reports/separate-reports",
         "overwrite": false,
         "html": false,
         "json": true
