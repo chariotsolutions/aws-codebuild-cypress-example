@@ -118,7 +118,7 @@ Resources:
               - 'screenshots/**/*'
               - 'videos/**/*'
               - 'mochawesome-reports/**/*'
-            base-directory: 'docker-platform/cypress-tests/cypress/'
+            base-directory: 'cypress-tests/cypress/'
 
           cache:
             paths:
