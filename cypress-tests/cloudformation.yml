@@ -107,7 +107,6 @@ Resources:
                 - npm install
             build:
               commands:
-                - cd cypress-tests
                 - NO_COLOR=1 npx cypress run --browser chromium
               finally:
                 - npx mochawesome-merge "cypress/results/*.json" > mochawesome.json
