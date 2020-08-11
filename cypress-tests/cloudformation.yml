@@ -82,7 +82,7 @@ Resources:
         ComputeType:                    BUILD_GENERAL1_SMALL
         Image:                          aws/codebuild/amazonlinux2-x86_64-standard:3.0
         EnvironmentVariables:
-          - Name:                       "CYPRESS_BASE_URL"
+          - Name:                       CYPRESS_BASE_URL
             Value:                      !Ref CypressBaseUrl
       
       Source:
@@ -107,10 +107,10 @@ Resources:
                 - npm install
             build:
               commands:
-                - NO_COLOR=1 npx cypress run --browser chromium
+                - NO_COLOR=1 npx cypress run --browser chromium --headless --config baseUrl=${CYPRESS_BASE_URL}
               finally:
-                - npx mochawesome-merge "cypress/reports/separate-reports/*.json" > mochawesome.json
-                - npx marge mochawesome.json
+                - # npx mochawesome-merge "cypress/reports/separate-reports/*.json" > mochawesome.json
+                - # npx marge mochawesome.json
 
           artifacts:
             files:
@@ -119,7 +119,3 @@ Resources:
               - 'videos/**/*'
               - 'mochawesome-reports/**/*'
             base-directory: 'cypress-tests/cypress/'
-
-          cache:
-            paths:
-              - 'docker-platform/**'
