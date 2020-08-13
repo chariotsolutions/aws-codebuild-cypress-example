@@ -11,6 +11,12 @@ Parameters:
     Type:                               "String"
 
 Resources:
+
+  CypressReportBucket:
+    Type:                               AWS::S3::Bucket
+    Properties:
+      BucketName:                       !Sub "${AWS::StackName}-cypress-reports"
+
   CypressRole:
     Type:                               "AWS::IAM::Role"
     Properties:
@@ -28,7 +34,7 @@ Resources:
         - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
         - "arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess"
       Policies:
-        -
+        - # For running reports (not working)
           PolicyName:                   CodeBuildReportPolicy
           PolicyDocument:
             Version:                    "2012-10-17"
@@ -41,7 +47,7 @@ Resources:
                   - "codebuild:CreateReport"
                   - "codebuild:UpdateReport"
                   - "codebuild:BatchPutTestCases"
-        - 
+        - # for writing to CloudWatch
           PolicyName:                   CodeBuildLoggingPolicy
           PolicyDocument:
             Version:                    "2012-10-17"
@@ -52,11 +58,19 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource:                "*"
+        - # For uploading artifacts 
+          PolicyName:                   CodeBuildS3ArtifactBucketAccess
+          PolicyDocument:
+            Version:                  "2012-10-17"
+            Statement:
+              - # Static Hosting Bucket upload...
+                Effect:                 "Allow"
+                Action:
+                  - "s3:*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${CypressReportBucket}"
+                  - !Sub "arn:aws:s3:::${CypressReportBucket}/*"
 
-  CypressReportBucket:
-    Type:                               AWS::S3::Bucket
-    Properties:
-      BucketName:                       !Sub "${AWS::StackName}-cypress-reports"
 
   CypressRunner:
     Type: AWS::CodeBuild::Project
@@ -93,29 +107,29 @@ Resources:
         GitCloneDepth:                  1
         BuildSpec: |
           version: 0.2
-          env:
-            NO_COLOR: 1
           phases:
             install:
               runtime-versions:
                 nodejs: 12
-              commands:
-                - yum install -y xorg-x11-server-Xvfb.x86_64 gtk3-devel.x86_64 libnotify-devel.x86_64 GConf2-3.2.6-8.amzn2.0.2.x86_64 nss-3.44.0-4.amzn2.0.2.x86_64 libXScrnSaver.x86_64 alsa-lib-1.1.4.1-2.amzn2.x86_64
             pre_build:
               commands:
                 - cd cypress-tests
                 - npm install
             build:
               commands:
-                - NO_COLOR=1 npx cypress run --browser chromium --headless --config baseUrl=${CYPRESS_BASE_URL}
+                - export CONFIG="baseUrl=$CYPRESS_BASE_URL"
+                - echo $CONFIG
+                - NO_COLOR=1 ./node_modules/.bin/cypress run --browser chromium --headless --config "$CONFIG"
               finally:
-                - # npx mochawesome-merge "cypress/reports/separate-reports/*.json" > mochawesome.json
-                - # npx marge mochawesome.json
+                - npx mochawesome-merge "cypress/reports/separate-reports/*.json" > mochawesome.json
+                - npx marge mochawesome.json
+                - mv mochawesome-report cypress/
+                - ls -R cypress
 
           artifacts:
             files:
               - 'reports/**/*'
               - 'screenshots/**/*'
               - 'videos/**/*'
-              - 'mochawesome-reports/**/*'
-            base-directory: 'cypress-tests/cypress/'
+              - 'mochawesome-report/**/*'
+            base-directory: 'cypress-tests/cypress'

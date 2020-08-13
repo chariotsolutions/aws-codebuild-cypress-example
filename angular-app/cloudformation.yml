@@ -24,25 +24,11 @@ Resources:
             Effect: Allow
             Principal: '*'
             Action: 's3:GetObject'
-            Resource: !Join 
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref S3Bucket
-                - /*
+            Resource: !Sub "arn:aws:s3:::${S3Bucket}/*"
       Bucket: !Ref S3Bucket
 Outputs:
   WebsiteURL:
-    Value: !GetAtt 
-      - S3Bucket
-      - WebsiteURL
+    Value:                      !GetAtt "S3Bucket.WebsiteURL"
     Description: URL for website hosted on S3
-  S3BucketSecureURL:
-    Value: !Join 
-      - ''
-      - - 'https://'
-        - !GetAtt 
-          - S3Bucket
-          - DomainName
-    Description: Name of S3 bucket to hold website content
   S3BucketName:
     Value: !Ref S3Bucket
